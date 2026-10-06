@@ -14,3 +14,5 @@ steps:
       - '--allow-unauthenticated'
 images:
   - 'gcr.io/$PROJECT_ID/whisperbox-http:$COMMIT_SHA'
+options:
+  logging: CLOUD_LOGGING_ONLY

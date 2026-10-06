@@ -1,0 +1,21 @@
+.pixi/*
+!.pixi/config.toml
+pixi.lock
+*.o
+
+# compiled binaries (regenerable via mojo build)
+main
+main_test
+main_flush_test
+main_local_test
+main_loop_test
+main_mlp
+
+# debug/test scratch files from troubleshooting
+*_check.mojo
+*_check2.mojo
+pycheck.mojo
+mojo_module.mojo
+localtest_out.txt
+out_flush.txt
+commandsToRun.txt

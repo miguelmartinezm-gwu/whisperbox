@@ -16,13 +16,8 @@ ENV PATH="/root/.pixi/bin:${PATH}"
 WORKDIR /build
 
 COPY pixi.toml ./
-COPY pixi.lock* ./
 
-RUN if [ -f pixi.lock ]; then \
-      pixi install; \
-    else \
-      pixi add mojo python && pixi install; \
-    fi
+RUN pixi add mojo python && pixi install
 
 COPY main.mojo .
 
@@ -46,10 +41,9 @@ ENV PATH="/opt/pixi-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/s
 ENV LD_LIBRARY_PATH="/opt/pixi-env/lib"
 ENV PYTHONHOME="/opt/pixi-env"
 ENV PYTHONPATH="/opt/pixi-env/lib/python3.14"
-# Required for Mojo std.python (PyRun_SimpleString, etc.)
 ENV LD_PRELOAD="/opt/pixi-env/lib/libpython3.14.so.1.0"
 
 ENV PORT=8080
 EXPOSE 8080
 
-ENTRYPOINT ["/main"]pwd
+ENTRYPOINT ["/main"]

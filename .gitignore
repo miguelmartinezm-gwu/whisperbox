@@ -19,3 +19,5 @@ mojo_module.mojo
 localtest_out.txt
 out_flush.txt
 commandsToRun.txt
+main_flush_test.mojo
+main_loop_test.mojo

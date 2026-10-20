@@ -79,3 +79,27 @@ fog_activate() {
   cd ~/niobium-client
   echo "niobium venv activated, FOG_API_TOKEN loaded: ${FOG_API_TOKEN:0:8}..."
 }
+
+# --- Disk space check, runs on every admin.sh load ---
+DISK_USED_PCT=$(df -h ~ | tail -1 | awk '{print $5}' | tr -d '%')
+DISK_AVAIL=$(df -h ~ | tail -1 | awk '{print $4}')
+if [ "$DISK_USED_PCT" -ge 80 ]; then
+  echo "⚠️  WARNING: Disk is ${DISK_USED_PCT}% full (${DISK_AVAIL} free). Run 'wb_diskcheck' for a breakdown."
+fi
+
+wb_diskcheck() {
+  echo "--- Disk usage ---"
+  df -h ~
+  echo "--- Largest items in home ---"
+  du -sh ~/* 2>/dev/null | sort -rh | head -10
+  echo "--- Cache breakdown ---"
+  du -sh ~/.cache/* 2>/dev/null | sort -rh | head -10
+}
+
+wb_clean_cache() {
+  echo "Clearing pixi download cache and pip cache (safe, regenerable)..."
+  rm -rf ~/.cache/rattler
+  rm -rf ~/.cache/pip
+  echo "Done. New usage:"
+  df -h ~
+}

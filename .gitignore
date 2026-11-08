@@ -24,3 +24,4 @@ main_loop_test.mojo
 fog_submit_dot8
 fog_decrypt_dot8
 dot8_server_workload_ckks_dot8/
+*.tar.gz

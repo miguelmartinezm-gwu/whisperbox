@@ -73,9 +73,9 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
         try:
             twin_score = 5.415389525030956
 
-            server_bin = "/home/mickeymesmu/niobium-client/build/examples/dot8_server"
-            key_dir = "/home/mickeymesmu/niobium-client/build/examples/dot8_keys"
-            fog_script = "/home/mickeymesmu/niobium-client/scripts/fog"
+            server_bin = "/fog/dot8_server"
+            key_dir = "/fog/dot8_keys"
+            fog_script = "/fog/fog"
 
             submit = subprocess.run(
                 ["python3", fog_script, "submit", server_bin, key_dir, "--target=FOG"],
@@ -84,7 +84,7 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
             if submit.returncode != 0:
                 raise RuntimeError("Fog submit failed: " + submit.stderr[-500:])
 
-            decrypt_bin = "/home/mickeymesmu/niobium-client/build/examples/dot8_decrypt"
+            decrypt_bin = "/fog/dot8_decrypt"
             decrypt = subprocess.run(
                 [decrypt_bin, key_dir],
                 capture_output=True, text=True, timeout=60

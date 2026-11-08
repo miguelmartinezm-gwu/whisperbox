@@ -79,7 +79,7 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
 
             submit = subprocess.run(
                 ["python3", fog_script, "submit", server_bin, key_dir, "--target=FOG"],
-                capture_output=True, text=True, timeout=300
+                capture_output=True, text=True, timeout=300, encoding='utf-8', errors='replace'
             )
             if submit.returncode != 0:
                 raise RuntimeError("Fog submit failed: " + submit.stderr[-500:])
@@ -87,7 +87,7 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
             decrypt_bin = "/fog/dot8_decrypt"
             decrypt = subprocess.run(
                 [decrypt_bin, key_dir],
-                capture_output=True, text=True, timeout=60
+                capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace'
             )
             if decrypt.returncode != 0:
                 raise RuntimeError("Decrypt failed: " + decrypt.stderr[-500:])

@@ -3,14 +3,15 @@ set -e
 
 echo "Fetching Fog keys from gs://${FOG_KEYS_BUCKET}/dot8_keys.tar.gz..."
 mkdir -p /fog
-python3 -c "
-from google.cloud import storage
-client = storage.Client()
-bucket = client.bucket('${FOG_KEYS_BUCKET}')
-blob = bucket.blob('dot8_keys.tar.gz')
-blob.download_to_filename('/fog/dot8_keys.tar.gz')
-print('downloaded')
-"
+
+TOKEN=$(curl -s -H "Metadata-Flavor: Google" \
+  "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
+  | jq -r '.access_token')
+
+curl -s -H "Authorization: Bearer ${TOKEN}" \
+  -o /fog/dot8_keys.tar.gz \
+  "https://storage.googleapis.com/storage/v1/b/${FOG_KEYS_BUCKET}/o/dot8_keys.tar.gz?alt=media"
+
 tar xzf /fog/dot8_keys.tar.gz -C /fog/
 echo "Keys ready at ${FOG_KEYS_DIR}"
 

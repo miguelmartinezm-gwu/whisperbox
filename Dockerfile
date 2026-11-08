@@ -33,9 +33,8 @@ RUN pixi run mojo build main.mojo -o main \
 FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates python3 python3-pip curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip3 install --no-cache-dir --break-system-packages google-cloud-storage
+    ca-certificates curl jq \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /build/main /main
 COPY --from=build /build/.pixi/envs/default /opt/pixi-env

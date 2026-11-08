@@ -11,6 +11,7 @@ FROM ubuntu:24.04 AS build
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates clang build-essential \
     && rm -rf /var/lib/apt/lists/*
+RUN update-ca-certificates
 
 RUN curl -fsSL https://pixi.sh/install.sh | sh
 ENV PATH="/root/.pixi/bin:${PATH}"
@@ -33,8 +34,9 @@ RUN pixi run mojo build main.mojo -o main \
 FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl jq \
+    ca-certificates curl jq openssl libssl3 \
     && rm -rf /var/lib/apt/lists/*
+RUN update-ca-certificates
 
 COPY --from=build /build/main /main
 COPY --from=build /build/.pixi/envs/default /opt/pixi-env
@@ -57,6 +59,10 @@ ENV PYTHONPATH="/opt/pixi-env/lib/python3.14"
 ENV LD_PRELOAD="/opt/pixi-env/lib/libpython3.14.so.1.0"
 ENV FOG_KEYS_BUCKET="whisperbox-510521-fog-keys"
 ENV FOG_KEYS_DIR="/fog/dot8_keys"
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_DIR=/etc/ssl/certs
+ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 ENV PORT=8080
 EXPOSE 8080

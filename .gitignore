@@ -21,3 +21,5 @@ out_flush.txt
 commandsToRun.txt
 main_flush_test.mojo
 main_loop_test.mojo
+fog_submit_dot8
+fog_decrypt_dot8

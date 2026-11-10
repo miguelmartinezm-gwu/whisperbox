@@ -1,9 +1,10 @@
 # main.mojo
-# Whisperbox M3 + M5a + M6: Mojo + Python interop HTTP server on Cloud Run.
-# Routes: / (alive check), /fog/jobs (control plane), /score (M6 full
+# Whisperbox M3 + M5a + M6 + M7: Mojo + Python interop HTTP server on Cloud
+# Run. Routes: / (alive check), /fog/jobs (control plane), /score (M6 full
 # triangulation: Mojo twin -> Fog encrypted dot8 -> decrypt -> Modular/
-# MiniMax narration -> JSON). Mojo owns main/startup; Python (via
-# std.python interop) owns the HTTP server loop and all external calls.
+# MiniMax narration -> JSON). CORS enabled for M7's browser-based UI.
+# Mojo owns main/startup; Python (via std.python interop) owns the HTTP
+# server loop and all external calls.
 
 from std.python import Python
 
@@ -24,6 +25,12 @@ import requests
 import subprocess
 
 class WhisperboxHandler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self._send_cors_headers()
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     def do_GET(self):
         if self.path == "/fog/jobs":
             self._handle_fog_jobs()
@@ -32,23 +39,28 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
         else:
             self._handle_root()
 
-    def _handle_root(self):
-        body = b'{"status":"ok","message":"mojo + python interop alive on cloud run"}'
-        self.send_response(200)
+    def _send_cors_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+    def _send_json(self, body, status_code):
+        self.send_response(status_code)
+        self._send_cors_headers()
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
+    def _handle_root(self):
+        body = b'{"status":"ok","message":"mojo + python interop alive on cloud run"}'
+        self._send_json(body, 200)
+
     def _handle_fog_jobs(self):
         token = os.environ.get("FOG_API_TOKEN", "")
         if not token:
             body = json.dumps({"status": "error", "message": "FOG_API_TOKEN not set"}).encode()
-            self.send_response(500)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._send_json(body, 500)
             return
 
         try:
@@ -63,11 +75,7 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
             body = json.dumps({"status": "error", "message": str(e)}).encode()
             status = 502
 
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        self._send_json(body, status)
 
     def _handle_score(self):
         try:
@@ -131,11 +139,7 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
             body = json.dumps({"status": "error", "message": str(e)}).encode()
             status_code = 500
 
-        self.send_response(status_code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        self._send_json(body, status_code)
 
     def log_message(self, format, *args):
         pass

@@ -282,10 +282,14 @@ class WhisperboxHandler(BaseHTTPRequestHandler):
                         {"role": "system", "content": "You narrate numeric risk scores in one short sentence. Output strict JSON only. You never see raw data, only numbers."},
                         {"role": "user", "content": "score_method=cosine score=" + str(fog_score) + " label=" + label + '. Respond with JSON only: {"risk_sentence": "<one short sentence>"}'}
                     ],
-                    max_tokens=100,
+                    max_tokens=512,
+                    reasoning_effort="low",
                     temperature=0.2,
                 )
-                explanation = resp.choices[0].message.content
+                msg = resp.choices[0].message
+                explanation = (msg.content or getattr(msg, "reasoning_content", None) or "").strip()
+                if not explanation:
+                    explanation = "Narration unavailable (model returned empty content)."
 
             result = {
                 "status": "ok",
